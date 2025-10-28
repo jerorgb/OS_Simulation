@@ -40,8 +40,7 @@ El simulador cuenta con tres módulos principales:
 - No interrumpe el proceso actual hasta que termina.
 - Reduce el tiempo promedio de espera respecto a RR.
 
-**Invariante del Scheduler:**  
-En cada tick, solo un proceso puede estar en estado `RUNNING`, y los demás están en `READY`, `BLOCKED` o `TERMINATED`.
+
 
 ---
 
