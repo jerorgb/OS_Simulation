@@ -80,4 +80,9 @@ Ademas de esto nuestro simulador es user friendly o podras ver un comando de ayu
 ```bash
 help
 ```
-en el simulador
+en la terminal del simulador.
+
+
+## 👨‍💻 Desarrolladores
+Este proyecto esta siendo desarrollado por estudiantes de ingenieria de sistemas de la Universidad EAFIT.
+---
