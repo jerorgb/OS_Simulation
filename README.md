@@ -85,4 +85,4 @@ en la terminal del simulador.
 
 ## 👨‍💻 Desarrolladores
 Este proyecto esta siendo desarrollado por estudiantes de ingenieria de sistemas de la Universidad EAFIT.
----
+
