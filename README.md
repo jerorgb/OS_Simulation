@@ -41,7 +41,6 @@ El simulador cuenta con tres módulos principales:
 - Reduce el tiempo promedio de espera respecto a RR.
 
 
-
 ---
 
 ## 🧠 Manejo de Memoria — Paginación
@@ -63,7 +62,7 @@ El sistema cuenta con contadores de:
 
 ## 🚀 Cómo Ejecutarlo
 
-### 🔧  Compilar el simulador principal
+###   Compilar el simulador principal
 
 Abre una terminal en la carpeta donde guardes el  proyecto y ejecuta:
 
