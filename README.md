@@ -1,4 +1,4 @@
-# 🧠 Simulador de Sistema Operativo — C++
+#  Simulador de Sistema Operativo — C++
 
 ## 📋 Descripción General
 
@@ -30,12 +30,12 @@ El simulador cuenta con tres módulos principales:
 
 ## ⚙️ Planificación de CPU
 
-### 🔁 Round Robin (RR)
+###  Round Robin (RR)
 - Usa una cola circular de procesos READY.
 - Quantum configurable (por defecto `2` ticks).
 - Si un proceso agota su quantum sin finalizar, se mueve al final de la cola.
 
-### ⏳ SJF No Expropiativo
+###  SJF No Expropiativo
 - Selecciona el proceso con la menor ráfaga restante.
 - No interrumpe el proceso actual hasta que termina.
 - Reduce el tiempo promedio de espera respecto a RR.
@@ -46,16 +46,16 @@ El simulador cuenta con tres módulos principales:
 
 ## 🧠 Manejo de Memoria — Paginación
 
-### 📦 FIFO (First-In, First-Out)
+###  FIFO (First-In, First-Out)
 - Cada página cargada entra a una cola.
 - Cuando se llena la memoria, se reemplaza la más antigua.
 
-### 🔄 LRU (Least Recently Used)
+###  LRU (Least Recently Used)
 - Registra el último acceso de cada página.
 - Se reemplaza la menos recientemente usada.
 - Mejora el rendimiento gracias al principio de localidad temporal.
 
-### 📈 Métricas y Estadísticas
+###  Métricas y Estadísticas
 El sistema cuenta con contadores de:
 - Accesos de página totales.
 - Fallos de página (page faults).
