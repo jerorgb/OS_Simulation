@@ -48,9 +48,9 @@ struct PCB {
           espera_acumulada(0), npages(pages), trace_pos(0), page_faults(0) {}
 };
 
-// ----------------------------
+
 // Frame y administrador de memoria
-// ----------------------------
+
 struct Frame {
     int fid;        // frame id
     int pid;        // id del proceso dueño, -1 si está libre
