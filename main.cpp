@@ -5,9 +5,9 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-// ----------------------------
+
 // Tipos y utilidades
-// ----------------------------
+
 enum class Estado { NEW, READY, RUNNING, BLOCKED, TERMINATED };
 string estado_to_str(Estado e) {
     switch (e) {
@@ -22,9 +22,9 @@ string estado_to_str(Estado e) {
 
 static std::mt19937 rng((unsigned)chrono::system_clock::now().time_since_epoch().count());
 
-// ----------------------------
-// PCB (Process Control Block)
-// ----------------------------
+
+// PCB (Bloque de Control de Proceso)
+
 struct PCB {
     int pid;
     Estado estado;
@@ -36,10 +36,10 @@ struct PCB {
     int espera_acumulada;
     // Memoria virtual: páginas del proceso (0..npages-1)
     int npages;
-    vector<int> trace;     // optional trace of pages to access each time it runs
+    vector<int> trace;     // traza opcional de páginas a acceder en cada ejecución
     int trace_pos;
 
-    // stats paginación
+    // estadísticas de paginación
     int page_faults;
 
     PCB(int _pid=0, int burst=0, int now=0, int pages=4)
@@ -49,29 +49,29 @@ struct PCB {
 };
 
 // ----------------------------
-// Frame and Memory Manager
+// Frame y administrador de memoria
 // ----------------------------
 struct Frame {
     int fid;        // frame id
-    int pid;        // owner pid, -1 if free
-    int page;       // page number
-    long long loaded_at_tick; // for FIFO
-    long long last_access_tick; // for LRU
+    int pid;        // id del proceso dueño, -1 si está libre
+    int page;       // número de pagina
+    long long loaded_at_tick; // para FIFO
+    long long last_access_tick; // para LRU
     Frame(int id=0): fid(id), pid(-1), page(-1), loaded_at_tick(-1), last_access_tick(-1) {}
 };
 
 enum class ReplPolicy { FIFO, LRU };
 
-// Memory manager: global frames, replacement global
+// Administrador de memoria: conjunto de frames global, reemplazo global
 class MemoryManager {
 private:
     vector<Frame> frames;
     ReplPolicy policy;
     long long tick_counter = 0;
-    // For FIFO we can maintain a queue of frame ids in order of load
+    // Para FIFO mantenemos una cola de IDs de frames en orden de carga
     deque<int> fifo_queue;
 
-    // stats
+    // estadísticas
     int total_page_faults = 0;
     int total_replacements = 0;
 
@@ -84,7 +84,7 @@ public:
 
     void set_policy(ReplPolicy p) {
         policy = p;
-        // resetting FIFO queue based on current loaded frames
+        // reinicia la cola FIFO según los frames cargados
         fifo_queue.clear();
         for (auto &f : frames) if (f.pid != -1) fifo_queue.push_back(f.fid);
     }
@@ -95,7 +95,7 @@ public:
 
     void advance_tick() { tick_counter++; }
 
-    // Check if (pid,page) is resident; if yes, update LRU stamp and return true
+  // Verifica si (pid,page) está en memoria; si sí, actualiza LRU y retorna true
     bool is_resident_and_touch(int pid, int page) {
         for (auto &f : frames) {
             if (f.pid == pid && f.page == page) {
@@ -106,10 +106,10 @@ public:
         return false;
     }
 
-    // Load (pid,page) into memory, possibly evicting. Returns frame id where loaded.
+    // Carga (pid,page) en memoria, posiblemente reemplazando otro frame
     int load_page(int pid, int page) {
         total_page_faults++;
-        // look for free frame
+        // busca frame libre
         for (auto &f : frames) {
             if (f.pid == -1) {
                 f.pid = pid; f.page = page;
@@ -119,30 +119,29 @@ public:
                 return f.fid;
             }
         }
-        // No free frame -> replace
+        // No hay frame libre, entonces se reemplazar
         int victim_fid = choose_victim();
-        // perform replacement
+        // realizar reemplazo
         Frame &vf = frames[victim_fid];
-        // (we could report which pid/page was evicted)
         vf.pid = pid;
         vf.page = page;
         vf.loaded_at_tick = tick_counter;
         vf.last_access_tick = tick_counter;
         total_replacements++;
         if (policy == ReplPolicy::FIFO) {
-            // rotate fifo queue: remove victim then push back new loaded
+           // rotar la cola FIFO: eliminar víctima y agregar nuevo
             auto it = find(fifo_queue.begin(), fifo_queue.end(), victim_fid);
             if (it != fifo_queue.end()) fifo_queue.erase(it);
             fifo_queue.push_back(victim_fid);
         }
         return victim_fid;
     }
-
+    // Selección de víctima para reemplazo
     int choose_victim() {
         if (policy == ReplPolicy::FIFO) {
-            // victim is front of fifo_queue
+    // La víctima está al frente de la cola FIFO
             if (fifo_queue.empty()) {
-                // fallback: find frame with oldest loaded_at_tick
+                // fallback: encuentra el más antiguo por loaded_at_tick
                 long long minload = LLONG_MAX; int fid=0;
                 for (auto &f: frames) if (f.loaded_at_tick < minload) { minload=f.loaded_at_tick; fid=f.fid; }
                 return fid;
@@ -163,11 +162,11 @@ public:
         }
     }
 
-    // API: access page for pid -> returns pair(had_page(bool), frame id)
+    // API: acceso a página, retorna par (tenía_página(bool), id_frame)
     pair<bool,int> access_page(int pid, int page) {
-        // increment tick counter for LRU timestamps context (caller should call advance_tick too)
-        // Actually caller will call advance_tick before; we assume tick_counter is current tick
-        // check resident
+    // Incrementar el contador de ticks para el contexto de marcas de tiempo LRU (quien llama también debe llamar a advance_tick)
+    // En realidad, quien llama llamará a advance_tick antes; asumimos que tick_counter es el tick actual
+    //Comprobar residente
         if (is_resident_and_touch(pid,page)) {
             return {true, -1};
         } else {
@@ -176,11 +175,11 @@ public:
         }
     }
 
-    // stats getters
+    // estadísticas getters
     int get_total_page_faults() const { return total_page_faults; }
     int get_total_replacements() const { return total_replacements; }
 
-    // display memory status
+    // Mostrar estado de los frames
     void dump_frames() const {
         cout << "Frames (id : pid,page,loaded_at,last_access):\n";
         for (auto &f: frames) {
@@ -191,9 +190,9 @@ public:
     }
 };
 
-// ----------------------------
-// Scheduler (two algorithms): RR and SJF non-preemptive
-// ----------------------------
+
+// Planificador (dos algoritmos): RR y SJF no expropiativo
+
 enum class CPUPolicy { RR, SJF_NONPREEMPTIVE };
 
 class Scheduler {
@@ -204,16 +203,16 @@ private:
     int next_pid = 1;
 
     unordered_map<int, PCB> procs;
-    deque<int> ready_q;          // for RR
-    // For SJF we'll look into procs to select shortest when CPU free
+    deque<int> ready_q;          // cola de listos (para RR)
+    // Para SJF, analizaremos los procesos para seleccionar el más corto cuando haya CPU libre.
 
     optional<int> running_pid;
-    int rr_slice_used = 0; // units used in current RR slice
+    int rr_slice_used = 0; // Unidades utilizadas en la porción RR actual
 
 public:
     Scheduler(CPUPolicy p = CPUPolicy::RR, int q=2): policy(p), quantum(q) {}
 
-    // create process
+    // crea el proceso
     int create_process(int burst, int npages = 4, const vector<int> &trace = {}) {
         int pid = next_pid++;
         PCB pcb(pid, burst, current_tick, npages);
@@ -225,13 +224,13 @@ public:
         return pid;
     }
 
-    // kill process
+    // "mata" el proceso
     void kill_process(int pid) {
         if (procs.find(pid) == procs.end()) { cout << "pid not found\n"; return; }
         auto &p = procs[pid];
         p.estado = Estado::TERMINATED;
         p.fin_tick = current_tick;
-        // remove from ready_q if present
+    // Eliminar de ready_q si está presente
         ready_q.erase(remove(ready_q.begin(), ready_q.end(), pid), ready_q.end());
         if (running_pid && running_pid.value() == pid) {
             running_pid.reset();
@@ -240,11 +239,11 @@ public:
         cout << "[tick " << current_tick << "] KILLED pid=" << pid << "\n";
     }
 
-    // change CPU policy
+    // cambia politica de la CPU
     void set_policy(CPUPolicy p, int q = 2) {
         policy = p;
         quantum = q;
-        // reset runtime state
+        // restablecer el estado de tiempo de ejecución
         running_pid.reset();
         rr_slice_used = 0;
         cout << "Scheduler set to " << (policy==CPUPolicy::RR ? "RR" : "SJF_nonpreemptive") << " quantum=" << quantum << "\n";
@@ -252,7 +251,7 @@ public:
 
     CPUPolicy get_policy() const { return policy; }
 
-    // helper to pick next process when CPU free
+    // Función auxiliar para seleccionar el siguiente proceso cuando haya CPU libre
     optional<int> schedule_next() {
         if (policy == CPUPolicy::RR) {
             if (!running_pid && !ready_q.empty()) {
@@ -260,8 +259,8 @@ public:
                 return pid;
             }
             return {};
-        } else { // SJF non-preemptive
-            // choose READY process with smallest rafaga_restante
+        } else { // SJF no expropiativo
+            // elige el proceso READY con el rafaga_restante más pequeño
             int best = -1;
             int best_burst = INT_MAX;
             for (auto &kv : procs) {
@@ -274,7 +273,7 @@ public:
                 }
             }
             if (best != -1) {
-                // remove best from ready list container (ready_q may still contain it)
+                // Eliminar "best" del contenedor de la lista de READY (ready_q aún podría contenerlo)
                 ready_q.erase(remove(ready_q.begin(), ready_q.end(), best), ready_q.end());
                 return best;
             }
@@ -282,10 +281,9 @@ public:
         }
     }
 
-    // progress 1 tick: CPU executes 1 unit if running
-    // returns optional pid that ran (so memory manager can perform access)
+    // Avanza un tick: ejecuta 1 unidad si hay proceso corriendo
     optional<int> tick() {
-        // if nothing is running, schedule
+        // si no hay proceso corriendo, planifica uno
         if (!running_pid) {
             auto next = schedule_next();
             if (next) {
@@ -298,7 +296,7 @@ public:
             }
         }
 
-        // increment waiting time for READY processes
+        // incrementar tiempo de espera para procesos en READY
         for (auto &kv : procs) {
             auto &p = kv.second;
             if (p.estado == Estado::READY) p.espera_acumulada++;
@@ -309,22 +307,22 @@ public:
             int pid = running_pid.value();
             ran_pid = pid;
             auto &p = procs[pid];
-            // execute 1 unit
+            // ejecutar 1 unidad
             p.rafaga_restante--;
             cout << "[tick " << current_tick << "] RUN pid=" << pid << " rem=" << p.rafaga_restante << "\n";
-            // check termination
+            // verifica terminación
             if (p.rafaga_restante <= 0) {
                 p.estado = Estado::TERMINATED;
-                p.fin_tick = current_tick + 1; // finishes at end of this tick
+                p.fin_tick = current_tick + 1; // finaliza al final de este ciclo
                 cout << "[tick " << current_tick << "] EXIT pid=" << pid << "\n";
                 running_pid.reset();
                 rr_slice_used = 0;
             } else {
-                // if RR, check quantum
+                // si RR, verifica el quantum
                 if (policy == CPUPolicy::RR) {
                     rr_slice_used++;
                     if (rr_slice_used >= quantum) {
-                        // preempt
+                        // expropiación
                         p.estado = Estado::READY;
                         ready_q.push_back(pid);
                         cout << "[tick " << current_tick << "] PREEMPT pid=" << pid << "\n";
@@ -332,8 +330,7 @@ public:
                         rr_slice_used = 0;
                     }
                 } else {
-                    // SJF non-preemptive -> do nothing, continue running until finishes
-                }
+                    }
             }
         }
 
@@ -341,7 +338,7 @@ public:
         return ran_pid;
     }
 
-    // run n ticks
+    // ejecutar n ticks (ciclos)
     void run_ticks(int n, function<void(int)> on_run_pid = nullptr) {
         for (int i = 0; i < n; ++i) {
             auto ran = tick();
@@ -349,23 +346,23 @@ public:
         }
     }
 
-    // get process (const)
+
     const unordered_map<int, PCB>& get_processes() const { return procs; }
 
-    // get mutable process
+
     unordered_map<int, PCB>& get_processes_mut() { return procs; }
 
-    // make process READY (used on creation)
+    // hace los procesos READY (usados en creation)
     void make_ready(int pid) {
         if (procs.find(pid) == procs.end()) return;
         auto &p = procs[pid];
         if (p.estado == Estado::NEW) p.estado = Estado::READY;
-        // avoid duplicate in ready_q
+        // evita duplicados en ready_q
         if (find(ready_q.begin(), ready_q.end(), pid) == ready_q.end())
             ready_q.push_back(pid);
     }
 
-    // show ps
+    // Mostrar tabla de procesos
     void ps() const {
         cout << "PID\tESTADO\tRAFAGA\tNPAGES\tARR\tINI\tFIN\tESPERA\tPF\n";
         for (auto &kv : procs) {
@@ -381,9 +378,9 @@ public:
     int get_tick() const { return current_tick; }
 };
 
-// ----------------------------
-// CLI + Integration
-// ----------------------------
+
+// CLI + Integración
+
 static string trim(const string &s) {
     size_t a = s.find_first_not_of(" \t\r\n");
     if (a==string::npos) return "";
@@ -407,9 +404,9 @@ int main() {
     cout << "=== OS Simulator (SJF non-preemptive + LRU) ===\n";
     cout << "Nota: scheduler default = RR quantum=2, page policy default = FIFO\n";
 
-    // defaults
+
     Scheduler sched(CPUPolicy::RR, 2);
-    MemoryManager mem(8, ReplPolicy::FIFO); // 8 frames default
+    MemoryManager mem(8, ReplPolicy::FIFO); 
 
     string line;
     while (true) {
@@ -444,11 +441,13 @@ int main() {
             int burst; if (!(ss >> burst)) { cout << "new requires burst\n"; continue; }
             int np = 4;
             if (ss >> np) {
-                // consumed np maybe; next token could be trace string (rest of line)
+
+
+                // Se consumió np; el siguiente token podría ser una cadena de seguimiento (resto de la línea)
                 string rest; getline(ss, rest);
                 rest = trim(rest);
                 if (!rest.empty()) {
-                    // parse comma separated ints
+                // Analizar enteros separados por comas
                     auto tr = parse_trace(rest);
                     int pid = sched.create_process(burst, np, tr);
                     sched.make_ready(pid);
@@ -457,7 +456,9 @@ int main() {
                     sched.make_ready(pid);
                 }
             } else {
-                // only burst given
+
+
+            // solo se dio una ráfaga
                 int pid = sched.create_process(burst, 4, {});
                 sched.make_ready(pid);
             }
@@ -503,13 +504,13 @@ int main() {
             mem.dump_frames();
         }
         else if (cmd == "tick") {
-            // advance memory tick first
+            // avanzar la memoria del tick primero
             mem.advance_tick();
-            // scheduler tick returns pid that executed this tick
+            // El tick del planificador devuelve el pid que ejecutó este tick
             auto ran = sched.tick();
             if (ran) {
                 int pid = ran.value();
-                // do memory access for pid: choose page from trace or random
+        // Realizar acceso a memoria para el pid: elegir página de la traza o aleatoriamente.
                 auto &procs = sched.get_processes_mut();
                 if (procs.find(pid) != procs.end()) {
                     PCB &p = procs[pid];
@@ -519,13 +520,13 @@ int main() {
                         page = p.trace[p.trace_pos++];
                         if (page < 0 || page >= p.npages) page = page % p.npages;
                     } else {
-                        // random page
+                        // pagina random
                         std::uniform_int_distribution<int> dist(0, max(0,p.npages-1));
                         page = dist(rng);
                     }
                     auto res = mem.access_page(pid, page);
                     if (!res.first) {
-                        // page fault
+                        // fallo de pagina
                         p.page_faults++;
                         cout << "[tick " << sched.get_tick()-1 << "] PAGE_FAULT pid=" << pid << " page=" << page << " loaded in frame=" << res.second << "\n";
                     } else {
