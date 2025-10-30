@@ -79,6 +79,11 @@ help
 ```
 en la terminal del simulador.
 
+---
+## 📹 Video de la entrega 2
+
+https://youtu.be/rEecp1i0-QE
+
 
 ## 👨‍💻 Desarrolladores
 Este proyecto esta siendo desarrollado por estudiantes de ingenieria de sistemas de la Universidad EAFIT.
