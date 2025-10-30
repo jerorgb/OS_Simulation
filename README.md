@@ -82,7 +82,7 @@ en la terminal del simulador.
 ---
 ## 📹 Video de la entrega 2
 
-https://youtu.be/rEecp1i0-QE
+https://youtu.be/rEecp1i0-QE 
 
 
 ## 👨‍💻 Desarrolladores
