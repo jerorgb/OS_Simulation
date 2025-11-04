@@ -1,0 +1,11 @@
+set_pagemode FIFO 4 
+run 50 
+memstat 
+ 
+set_pagemode FIFO 8 
+run 50 
+memstat 
+ 
+set_pagemode LRU 4 
+run 50 
+memstat
