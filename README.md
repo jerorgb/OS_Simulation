@@ -4,7 +4,6 @@
 
 Este proyecto se esta realizando para la entrega del proyecto final donde se implementa un **simulador de sistema operativo en C++**, diseñado para modelar los principios de planificación de CPU, manejo de memoria virtual y sincronización temporal.
 
-Este READ.ME esta centrado en la entrega dos a la hora de realizar la entrega final se actualizará.
 
 ---
 
@@ -80,6 +79,9 @@ help
 en la terminal del simulador.
 
 ---
+
+Adicional a esto se creo un codigo que genera la grafica de las estadisticas.
+
 ## 📹 Video de la entrega 2
 
 https://youtu.be/rEecp1i0-QE 
@@ -87,3 +89,4 @@ https://youtu.be/rEecp1i0-QE
 
 ## 👨‍💻 Desarrolladores
 Este proyecto esta siendo desarrollado por estudiantes de ingenieria de sistemas de la Universidad EAFIT.
+
