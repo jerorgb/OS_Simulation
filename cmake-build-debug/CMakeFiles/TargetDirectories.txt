@@ -1,3 +1,0 @@
-D:/CODING_WORK_SPACE_CARPET/EAFIT/C/ActEntrega03/cmake-build-debug/CMakeFiles/ActEntrega03.dir
-D:/CODING_WORK_SPACE_CARPET/EAFIT/C/ActEntrega03/cmake-build-debug/CMakeFiles/edit_cache.dir
-D:/CODING_WORK_SPACE_CARPET/EAFIT/C/ActEntrega03/cmake-build-debug/CMakeFiles/rebuild_cache.dir
